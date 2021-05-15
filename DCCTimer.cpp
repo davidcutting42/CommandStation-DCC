@@ -94,6 +94,12 @@ INTERRUPT_CALLBACK interruptHandler=0;
   }
 
 #elif defined(TEENSYDUINO)
+    //railcom timer facility
+    #define TIMER4_A_PIN   6
+    #define TIMER4_B_PIN   7
+    #define TIMER4_C_PIN   8
+
+
   IntervalTimer myDCCTimer;
 
   void DCCTimer::begin(INTERRUPT_CALLBACK callback) {
@@ -110,9 +116,13 @@ INTERRUPT_CALLBACK interruptHandler=0;
   }
 
   bool DCCTimer::isRailcomPin(byte pin) {
-       //Teensy: digitalPinHasPWM, todo
-      (void) pin;
-       return false;  // TODO what are the relevant pins? 
+	  return
+       #ifdef TIMER4_A_PIN 
+              pin==TIMER4_A_PIN ||
+              pin==TIMER4_B_PIN ||
+              pin==TIMER4_C_PIN ||
+       #endif       
+              false;
   }
 
  void DCCTimer::setPWM(byte pin, bool high) {

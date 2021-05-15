@@ -48,9 +48,12 @@ void DCCWaveform::begin(MotorDriver * mainDriver, MotorDriver * progDriver) {
 				 && (mainDriver->getFaultPin() != UNUSED_PIN));
   // Only use PWM if both pins are PWM capable. Otherwise JOIN does not work
   MotorDriver::usePWM= mainDriver->isPWMCapable() && progDriver->isPWMCapable();
-  supportsRailcom= MotorDriver::usePWM && mainDriver->isRailcomCapable() && progDriver->isRailcomCapable();
+  #ifndef TEENSYDUINO
+    supportsRailcom= MotorDriver::usePWM && mainDriver->isRailcomCapable() && progDriver->isRailcomCapable();
+  #else
+    supportsRailcom=mainDriver->isRailcomCapable() && progDriver->isRailcomCapable();
+  #endif  // supportsRailcom depends on hardware caopability
   
-  // supportsRailcom depends on hardware caopability
   // useRailcom is user switchable at run time. 
   useRailcom=supportsRailcom;
   
@@ -60,7 +63,8 @@ void DCCWaveform::begin(MotorDriver * mainDriver, MotorDriver * progDriver) {
   }
   else
     DIAG(F("Signal pin config: normal accuracy waveform"));
-  DCCTimer::begin(DCCWaveform::interruptHandler);     
+    if (supportsRailcom) DIAG(F("Railcom cutout enabled"));
+    DCCTimer::begin(DCCWaveform::interruptHandler);     
 }
 
 void DCCWaveform::loop(bool ackManagerActive) {
