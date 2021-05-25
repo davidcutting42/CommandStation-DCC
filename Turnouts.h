@@ -28,10 +28,18 @@ const byte STATUS_PWM=0x40; // Flag as a PWM turnout
 const byte STATUS_PWMPIN=0x3F; // PWM  pin 0-63
 const int  LCN_TURNOUT_ADDRESS=-1;  // spoof dcc address -1 indicates a LCN turnout
 struct TurnoutData {
-   int id;
-   uint8_t tStatus; // has STATUS_ACTIVE, STATUS_PWM, STATUS_PWMPIN  
-   union {uint8_t subAddress; char moveAngle;}; //DCC  sub addrerss or PWM difference from inactiveAngle  
-   union {int address; int inactiveAngle;}; // DCC address or PWM servo angle 
+  int id;
+  uint8_t tStatus; // has STATUS_ACTIVE, STATUS_PWM, STATUS_PWMPIN  
+  union {
+    struct {
+      uint8_t subAddress;  // DCC  sub addrerss
+      int address;         // DCC address
+    };
+    struct {
+      uint16_t activePosition:12; // PWM Servo position
+      uint16_t inactivePosition:12; // PWM servo position
+    };
+  };
 };
 
 class Turnout {
@@ -47,7 +55,7 @@ class Turnout {
   static void load();
   static void store();
   static Turnout *create(int id , int address , int subAddress);
-  static Turnout *create(int id , byte pin , int activeAngle, int inactiveAngle);
+  static Turnout *create(int id , byte pin , int activePosition, int inactivePosition);
   static Turnout *create(int id);
   void activate(bool state);
   static void printAll(Print *);

@@ -64,7 +64,7 @@ void Turnout::activate(bool state) {
   else
     data.tStatus &= ~STATUS_ACTIVE;
   if (data.tStatus & STATUS_PWM)
-    PWMServoDriver::setServo(data.tStatus & STATUS_PWMPIN, (data.inactiveAngle+(state?data.moveAngle:0)));
+    PWMServoDriver::setServo(data.tStatus & STATUS_PWMPIN, state?data.activePosition:data.inactivePosition);
   else
     DCC::setAccessory(data.address,data.subAddress, state);
   // Save state if stored in EEPROM
@@ -105,7 +105,7 @@ void Turnout::load(){
 
   for(int i=0;i<EEStore::eeStore->data.nTurnouts;i++){
     EEPROM.get(EEStore::pointer(),data);
-    if (data.tStatus & STATUS_PWM) tt=create(data.id,data.tStatus & STATUS_PWMPIN, data.inactiveAngle,data.moveAngle);
+    if (data.tStatus & STATUS_PWM) tt=create(data.id,data.tStatus & STATUS_PWMPIN, data.activePosition,data.inactivePosition);
     else tt=create(data.id,data.address,data.subAddress);
     tt->data.tStatus=data.tStatus;
     tt->num=EEStore::pointer()+offsetof(TurnoutData,tStatus); // Save pointer to status byte within EEPROM
@@ -140,17 +140,21 @@ void Turnout::store(){
 
 Turnout *Turnout::create(int id, int add, int subAdd){
   Turnout *tt=create(id);
+  if (!tt) return(tt);
   tt->data.address=add;
   tt->data.subAddress=subAdd;
   tt->data.tStatus=0;
   return(tt);
 }
 
-Turnout *Turnout::create(int id, byte pin, int activeAngle, int inactiveAngle){
+Turnout *Turnout::create(int id, byte pin, int activePosition, int inactivePosition){
+  if (activePosition > 4095 || activePosition < 0 || inactivePosition > 4095 || inactivePosition < 0 || pin > 63) 
+    return NULL;  // Invalid parameter;
   Turnout *tt=create(id);
+  if (!tt) return(tt);
   tt->data.tStatus= STATUS_PWM | (pin &  STATUS_PWMPIN);
-  tt->data.inactiveAngle=inactiveAngle;
-  tt->data.moveAngle=activeAngle-inactiveAngle;
+  tt->data.inactivePosition=inactivePosition;
+  tt->data.activePosition=activePosition;
   return(tt);
 }
 
@@ -158,6 +162,7 @@ Turnout *Turnout::create(int id){
   Turnout *tt=get(id);
   if (tt==NULL) { 
      tt=(Turnout *)calloc(1,sizeof(Turnout));
+     if (!tt) return(tt);
      tt->nextTurnout=firstTurnout;
      firstTurnout=tt;
      tt->data.id=id;
@@ -173,7 +178,7 @@ Turnout *Turnout::create(int id){
 #ifdef EESTOREDEBUG
 void Turnout::print(Turnout *tt) {
     if (tt->data.tStatus & STATUS_PWM )
-      DIAG(F("Turnout %d ZeroAngle %d MoveAngle %d Status %d"),tt->data.id, tt->data.inactiveAngle, tt->data.moveAngle,tt->data.tStatus & STATUS_ACTIVE);
+      DIAG(F("Turnout %d InactivePos %d ActivePos %d Status %d"),tt->data.id, tt->data.inactivePosition, tt->data.activePosition,tt->data.tStatus & STATUS_ACTIVE);
     else
 	DIAG(F("Turnout %d Addr %d Subaddr %d Status %d"),tt->data.id, tt->data.address, tt->data.subAddress,tt->data.tStatus & STATUS_ACTIVE);
 }

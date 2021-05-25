@@ -658,7 +658,11 @@ bool DCCEXParser::parseT(Print *stream, int16_t params, int16_t p[])
         for (Turnout *tt = Turnout::firstTurnout; tt != NULL; tt = tt->nextTurnout)
         {
             gotOne = true;
-            StringFormatter::send(stream, F("<H %d %d %d %d>\n"), tt->data.id, tt->data.address, 
+            if (tt->data.tStatus & STATUS_PWM)
+              StringFormatter::send(stream, F("<H %d %d %d %d %d>\n"), tt->data.id, tt->data.tStatus & STATUS_PWMPIN, 
+                tt->data.activePosition, tt->data.inactivePosition, (tt->data.tStatus & STATUS_ACTIVE)!=0);
+            else
+              StringFormatter::send(stream, F("<H %d %d %d %d>\n"), tt->data.id, tt->data.address, 
                 tt->data.subAddress, (tt->data.tStatus & STATUS_ACTIVE)!=0);
         }
         return gotOne; // will <X> if none found
