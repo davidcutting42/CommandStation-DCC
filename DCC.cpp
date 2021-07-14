@@ -753,8 +753,8 @@ void DCC::ackManagerLoop() {
               byte message[] = {cv1(BIT_MANIPULATE, ackManagerCv), cv2(ackManagerCv), instruction };
               DCCWaveform::progTrack.schedulePacket(message, sizeof(message), PROG_REPEATS);
               DCCWaveform::progTrack.setAckPending(); 
-             callbackState=AFTER_WRITE;
-         }
+              callbackState=AFTER_WRITE;
+            }
             break; 
       
       case WB:   // write byte 
@@ -873,8 +873,12 @@ void DCC::ackManagerLoop() {
           
      case COMBINELOCOID: 
           // ackManagerStash is  cv17, ackManagerByte is CV 18
-          callback( ackManagerByte + ((ackManagerStash - 192) << 8));
-          return;            
+         {
+          int locoid=ackManagerByte + ((ackManagerStash - 192) << 8);
+          if (locoid<128) locoid=-3;
+          callback(locoid);
+         }
+         return;            
 
      case ITSKIP:
           if (!ackReceived) break; 
