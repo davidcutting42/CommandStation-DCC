@@ -68,10 +68,11 @@ in config.h.
 * Release cabs from memory command <-> all cabs, <- CAB> for just one loco address
 * Automatic slot (register) management 
 * Automation (coming soon)
+* Support for the common S88 sensors.
 
 NOTE: DCC-EX is a major rewrite to the code. We started over and rebuilt it from the ground up! For what that means to you, click [HERE](notes/rewrite.md).
 
 # More information
 You can learn more at the [DCC++ EX website](https://dcc-ex.com/)
 
-- November 14, 2020
+- June 03, 2021

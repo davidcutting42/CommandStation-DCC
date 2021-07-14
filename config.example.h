@@ -110,5 +110,22 @@ The configuration file for DCC-EX Command Station
 // Also 132x64 I2C SH1106 devices.
 // #define OLED_DRIVER 128,32
 
+
+/////////////////////////////////////////////////////////////////////////////////////
+//
+// DEFINE S88_MEGA IF YOU WANT TO USE THE S88 BUS FOR SENSORS. TO CONFIGURE ALL THE
+// OTHER OPTIONS, PLEASE CHANGE THE DEFINES IN THE FILE S88_MEGA.H
+//
+#define S88_MEGA
+// You can use a timer for reading the sensors (preferred) or you can use the standard-loop
+#define S88_USE_TIMER
+//Here you can define how many sensors are connected at each bus
+#define S88_BUS0_LENGTH 16
+#define S88_BUS1_LENGTH 16
+#define S88_BUS2_LENGTH 16
+#define S88_BUS3_LENGTH 0
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 

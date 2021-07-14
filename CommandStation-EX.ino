@@ -43,7 +43,6 @@
  *  along with CommandStation.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "DCCEX.h"
 
 // Create a serial command parser for the USB connection, 
@@ -101,6 +100,11 @@ void setup()
   #endif
 
   LCD(1,F("Ready")); 
+
+#ifdef S88_MEGA		  
+  (S88Mega::getInstance())->S88_Init(S88_BUS0_LENGTH, S88_BUS1_LENGTH, 
+      S88_BUS2_LENGTH, S88_BUS3_LENGTH);
+#endif	
 }
 
 void loop()
