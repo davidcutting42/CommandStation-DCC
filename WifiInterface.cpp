@@ -316,12 +316,38 @@ wifiSerialState WifiInterface::setup2(const FSH* SSid, const FSH* password,
 
 
 // This function is used to allow users to enter <+ commands> through the DCCEXParser
+// <+command>  sends AT+command to the ES and returns to the caller.
 // Once the user has made whatever changes to the AT commands, a <+X> command can be used
 // to force on the connectd flag so that the loop will start picking up wifi traffic.
 // If the settings are corrupted <+RST> will clear this and then you must restart the arduino.
+
+// Using the <+> command with no command string causes the code to enter an echo loop so that all
+// input is directed to the ES and all ES output written to the USB Serial.
+// The sequence "!!!" returns the Arduino to the normal loop mode
+
  
 void WifiInterface::ATCommand(const byte * command) {
   command++;
+  if (*command=='\0') { // User gave <+> command  
+     DIAG(F("ES AT command passthrough mode, use ! to exit"));
+     while(Serial.available()) Serial.read(); // Drain serial input first 
+     bool startOfLine=true;
+     while(true) {
+      while (wifiStream->available()) Serial.write(wifiStream->read());
+      if (Serial.available()) {
+        int cx=Serial.read();
+        // A newline followed by !!! is an exit
+        if (cx=='\n' || cx=='\r') startOfLine=true; 
+        else if (startOfLine && cx=='!')  break;
+        else startOfLine=false; 
+        Serial.write(cx);
+        wifiStream->write(cx);  
+       }
+     }
+     DIAG(F("Passthrough Ended"));
+     return; 
+  }
+  
   if (*command=='X') {
      connected = true;
      DIAG(F("++++++ Wifi Connction forced on ++++++++"));

@@ -542,7 +542,7 @@ void DCCEXParser::parse(Print *stream, byte *com, RingStream * ringStream)
         return;
 
     case '+': // Complex Wifi interface command (not usual parse)
-        if (atCommandCallback) {
+        if (atCommandCallback && !ringStream) {
           DCCWaveform::mainTrack.setPowerMode(POWERMODE::OFF);
           DCCWaveform::progTrack.setPowerMode(POWERMODE::OFF);
           atCommandCallback(com);
